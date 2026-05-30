@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>컴퓨터개론 과제2 - 스마트 플래너 Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Pretendard', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body id="app-body" class="bg-slate-50 text-slate-800 min-h-screen flex items-center justify-center p-2 md:p-6 transition-colors duration-300">
+
+    <div id="app-container" class="relative w-full max-w-md bg-white text-slate-800 rounded-[36px] shadow-2xl border border-slate-100 overflow-hidden h-[845px] flex flex-col justify-between transition-colors duration-300">
+        
+        <div class="flex-1 overflow-y-auto no-scrollbar p-5 pb-24">
+            
+            <div id="view-home" class="view-section flex flex-col gap-4">
+                <header class="flex justify-between items-center">
+                    <div>
+                        <span class="text-[11px] font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full tracking-wide id-sub-tag">2026-1 컴퓨터개론 과제</span>
+                        <h1 class="text-xl font-extrabold tracking-tight mt-0.5"><span id="welcome-user">대학생</span>님의 하루</h1>
+                    </div>
+                    <button onclick="refreshQuote()" class="text-[11px] font-bold flex items-center gap-1 p-1.5 px-2.5 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer active:scale-95 transition id-mini-btn" title="응원 메시지 변경">
+                        <span>🔄</span> <span>명언 바꾸기</span>
+                    </button>
+                </header>
+
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-3.5 px-4 rounded-2xl shadow-sm text-xs">
+                    <span class="font-medium">📢 <span id="quote-text">오늘도 한 걸음씩 완벽한 하루를 향해!</span></span>
+                </div>
+
+                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-100/70 transition-colors duration-300 id-box">
+                    <div class="flex justify-between items-center mb-3 px-1">
+                        <button onclick="moveMonth(-1)" class="text-xs font-bold p-1.5 px-2.5 bg-white rounded-lg border border-slate-200 cursor-pointer id-btn-arrow">◀</button>
+                        <div class="flex items-center gap-1 bg-white p-1 px-2 rounded-xl border border-slate-200 id-selector-box">
+                            <select id="select-year" onchange="selectYearMonth()" class="font-bold text-slate-700 bg-transparent text-xs focus:outline-none cursor-pointer id-select-text"></select>
+                            <select id="select-month" onchange="selectYearMonth()" class="font-bold text-slate-700 bg-transparent text-xs focus:outline-none cursor-pointer id-select-text"></select>
+                        </div>
+                        <button onclick="moveMonth(1)" class="text-xs font-bold p-1.5 px-2.5 bg-white rounded-lg border border-slate-200 cursor-pointer id-btn-arrow">▶</button>
+                    </div>
+
+                    <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-slate-400 mb-1.5">
+                        <div class="text-rose-500">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div class="text-blue-500">토</div>
+                    </div>
+                    <div id="calendar-cells" class="grid grid-cols-7 gap-1"></div>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100/70 transition-colors duration-300 id-box">
+                    <h3 id="form-title" class="text-[11px] font-bold text-slate-400 uppercase mb-2.5">📍 일정 계획 추가</h3>
+                    <div class="flex flex-col gap-2">
+                        <input id="todo-input" type="text" placeholder="할 일이나 과제 명칭..." class="w-full bg-white text-slate-800 px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none id-input-field">
+                        <input id="todo-location" type="text" placeholder="장소 또는 상세 메모 (선택)..." class="w-full bg-white text-slate-800 px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none id-input-field">
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <input id="todo-date" type="date" class="bg-white text-slate-800 px-2 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none id-input-field">
+                            <input id="todo-time" type="time" class="bg-white text-slate-800 px-2 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none id-input-field">
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-2">
+                            <select id="todo-priority" class="col-span-1 bg-white text-slate-800 p-2 rounded-xl border border-slate-200 text-[11px] focus:outline-none id-input-field">
+                                <option value="엄청 중요">🔥 엄청 중요</option>
+                                <option value="중요">⭐ 중요</option>
+                                <option value="보통" selected>⚡ 보통</option>
+                                <option value="덜 중요">🌱 덜 중요</option>
+                                <option value="안 중요">💤 안 중요</option>
+                            </select>
+                            <input type="hidden" id="edit-id" value="">
+                            <button id="submit-btn" onclick="saveTodo()" class="col-span-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs transition cursor-pointer id-primary-btn">
+                                + 일정 등록
+                            </button>
+                        </div>
+                        <button id="cancel-edit-btn" onclick="resetForm()" class="hidden w-full bg-slate-200 text-slate-600 font-semibold py-1 rounded-xl text-[11px] cursor-pointer">수정 취소</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2 mt-1">
+                    <div class="flex justify-between items-center px-1">
+                        <h3 class="text-xs font-extrabold text-slate-900 id-list-title">📆 <span id="selected-date-label" class="text-blue-600">전체</span> 타임라인 목록</h3>
+                        <button onclick="filterSelectedDate('')" class="text-[10px] bg-slate-100 hover:bg-slate-200 p-1 px-2.5 rounded-lg font-medium cursor-pointer id-sub-btn">전체보기</button>
+                    </div>
+                    
+                    <div class="bg-blue-50/60 p-3 rounded-xl border border-blue-100/30 id-stats-box">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] font-bold text-slate-500 id-stats-title">선택한 날짜의 진행율</span>
+                            <span id="stats-percent" class="text-[11px] font-extrabold text-blue-600">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-200/70 h-2 rounded-full overflow-hidden">
+                            <div id="stats-bar" class="bg-blue-600 h-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div id="todo-list" class="flex flex-col gap-2.5 mt-1"></div>
+                </div>
+            </div>
+
+            <div id="view-stats" class="view-section hidden flex flex-col gap-5">
+                <div>
+                    <span class="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full tracking-wide">Analysis Dashboard</span>
+                    <h2 class="text-xl font-extrabold tracking-tight mt-0.5">📊 통계 및 성과 대시보드</h2>
+                </div>
+
+                <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-5 rounded-3xl shadow-xl flex items-center justify-between">
+                    <div class="flex flex-col gap-1">
+                        <p class="text-xs text-slate-400 font-medium">누적 목표 달성률</p>
+                        <h3 id="dashboard-percent-text" class="text-3xl font-black text-white tracking-tight">0%</h3>
+                        <p class="text-[11px] text-slate-400 mt-1.5">총 <span id="db-total-cnt" class="text-blue-400 font-bold">0</span>개 일정 중 <span id="db-complete-cnt" class="text-emerald-400 font-bold">0</span>개 완수</p>
+                    </div>
+                    
+                    <div class="relative w-20 h-20 flex items-center justify-center">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="text-slate-700" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path id="svg-progress-ring" class="text-blue-500 transition-all duration-500 ease-out" stroke-dasharray="0, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="absolute text-center">
+                            <span class="text-[16px]">🏆</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 id-box flex flex-col gap-3.5">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">🎯 중요도 등급별 이행률 통계</h4>
+                    
+                    <div class="flex flex-col gap-3">
+                        <div>
+                            <div class="flex justify-between text-[11px] font-bold mb-1">
+                                <span class="text-rose-600">🔥 엄청 중요</span>
+                                <span id="rate-ultra" class="text-slate-600 dark:text-slate-400">0/0 (0%)</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div id="bar-ultra" class="bg-gradient-to-r from-rose-500 to-red-500 h-full transition-all duration-300" style="width:0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[11px] font-bold mb-1">
+                                <span class="text-orange-500">⭐ 중요</span>
+                                <span id="rate-high" class="text-slate-600 dark:text-slate-400">0/0 (0%)</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div id="bar-high" class="bg-orange-500 h-full transition-all duration-300" style="width:0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[11px] font-bold mb-1">
+                                <span class="text-amber-500">⚡ 보통</span>
+                                <span id="rate-normal" class="text-slate-600 dark:text-slate-400">0/0 (0%)</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div id="bar-normal" class="bg-amber-500 h-full transition-all duration-300" style="width:0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[11px] font-bold mb-1">
+                                <span class="text-emerald-500">🌱 덜 중요</span>
+                                <span id="rate-low" class="text-slate-600 dark:text-slate-400">0/0 (0%)</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div id="bar-low" class="bg-emerald-500 h-full transition-all duration-300" style="width:0%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-[11px] font-bold mb-1">
+                                <span class="text-slate-400">💤 안 중요</span>
+                                <span id="rate-none" class="text-slate-600 dark:text-slate-400">0/0 (0%)</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div id="bar-none" class="bg-slate-400 h-full transition-all duration-300" style="width:0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50/50 p-3.5 rounded-xl border border-blue-100/40 text-[11px] text-blue-800 dark:bg-slate-950/40 dark:border-slate-800 dark:text-blue-400 flex gap-2">
+                    <span>💡</span>
+                    <p>중요도가 높은 상위 과제들을 완수할수록 대시보드의 성취 지표가 더욱 가파르게 상승합니다.</p>
+                </div>
+            </div>
+
+            <div id="view-settings" class="view-section hidden flex flex-col gap-4">
+                <h2 class="text-xl font-extrabold tracking-tight">⚙️ 시스템 환경 설정</h2>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col gap-4 id-box text-xs">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-bold">🌙 다크 모드 인터페이스</p>
+                            <p class="text-[10px] text-slate-400">UI 테마 및 픽셀 배색 실시간 스왑</p>
+                        </div>
+                        <button onclick="toggleDarkMode()" id="dark-toggle-btn" class="w-10 h-5 bg-slate-200 rounded-full p-0.5 transition-colors relative cursor-pointer flex items-center">
+                            <div id="dark-toggle-circle" class="w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-200"></div>
+                        </button>
+                    </div>
+
+                    <div class="flex flex-col gap-1.5 border-t border-slate-200 pt-3 id-divider">
+                        <p class="font-bold">👤 사용자 이름 변경</p>
+                        <div class="flex gap-2">
+                            <input id="username-input" type="text" placeholder="새 이름 입력..." class="w-full bg-white border border-slate-200 rounded-lg px-2 py-1.5 text-xs id-input-field">
+                            <button onclick="updateUsername()" class="bg-slate-900 text-white px-3 py-1.5 rounded-lg font-bold cursor-pointer whitespace-nowrap id-primary-btn">저장</button>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-200 pt-3 id-divider">
+                        <button onclick="factoryReset()" class="w-full bg-rose-50 text-rose-600 font-bold py-2 rounded-xl border border-rose-100 cursor-pointer">
+                            모든 스케줄 및 세팅 초기화
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="toast-notice" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white text-[10px] px-3 py-1.5 rounded-full shadow-md opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+            알림
+        </div>
+
+        <nav class="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-100 flex justify-around items-center py-2.5 z-40 rounded-b-[36px] id-nav">
+            <button onclick="switchTab('view-home', this)" class="nav-tab-btn flex flex-col items-center gap-0.5 text-blue-600 font-bold text-[11px] cursor-pointer">
+                <span class="text-lg">🏠</span><span>홈</span>
+            </button>
+            <button onclick="switchTab('view-stats', this)" class="nav-tab-btn flex flex-col items-center gap-0.5 text-slate-400 font-medium text-[11px] cursor-pointer">
+                <span class="text-lg">📊</span><span>달성률</span>
+            </button>
+            <button onclick="switchTab('view-settings', this)" class="nav-tab-btn flex flex-col items-center gap-0.5 text-slate-400 font-medium text-[11px] cursor-pointer">
+                <span class="text-lg">⚙️</span><span>설정</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <script>
+        let todos = [];
+        let currentDate = new Date(2026, 4, 31); // 2026년 5월 31일 기준 고정 세팅
+        let activeFilterDate = "";
+        let isDarkMode = false;
+
+        const quotes = [
+            "과제는 미루는 것이 아니라 끝내는 것이다. ✍️",
+            "지금 교수님이 당신의 명품 코드를 기대하고 계십니다. 🔥",
+            "A+ 학점은 계획적인 사람에게 가장 먼저 찾아갑니다. 🎓",
+            "오늘 할 과제를 내일로 미루면, 내일의 내가 고통받습니다. ⚡",
+            "완벽하지 않아도 좋습니다. 일단 완성해서 배포합시다! 🚀"
+        ];
+
+        // 🌟 가산점 기믹: 웹 브라우저 영구 보존 로딩 및 테마 동기화 처리
+        window.onload = function() {
+            const savedTodos = localStorage.getItem('vibe_planner_todos');
+            if (savedTodos) {
+                todos = JSON.parse(savedTodos);
+            }
+            const savedUser = localStorage.getItem('vibe_planner_user');
+            if (savedUser) {
+                document.getElementById('welcome-user').innerText = savedUser;
+            }
+            const savedDark = localStorage.getItem('vibe_planner_dark');
+            if (savedDark === 'true') {
+                toggleDarkMode(true);
+            }
+
+            initYearMonthSelectors();
+            refreshQuote();
+            renderCalendar();
+            renderTodoList();
+        };
+
+        // 데이터 변경이 있을 때마다 로컬 저장소에 동기화 백업하는 래퍼 함수
+        function saveToStorage() {
+            localStorage.setItem('vibe_planner_todos', JSON.stringify(todos));
+        }
+
+        function switchTab(targetViewId, btnElement) {
+            document.querySelectorAll('.view-section').forEach(view => view.classList.add('hidden'));
+            document.getElementById(targetViewId).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+                btn.classList.remove('text-blue-600', 'font-bold');
+                btn.classList.add('text-slate-400', 'font-medium');
+            });
+            btnElement.classList.remove('text-slate-400', 'font-medium');
+            btnElement.classList.add('text-blue-600', 'font-bold');
+            
+            if(targetViewId === 'view-stats') {
+                calculateGlobalStats();
+            }
+        }
+
+        function refreshQuote() {
+            const idx = Math.floor(Math.random() * quotes.length);
+            document.getElementById('quote-text').innerText = quotes[idx];
+        }
+
+        function initYearMonthSelectors() {
+            const yearSelect = document.getElementById('select-year');
+            const monthSelect = document.getElementById('select-month');
+            yearSelect.innerHTML = ''; monthSelect.innerHTML = '';
+
+            for(let y = 2020; y <= 2030; y++) {
+                const opt = document.createElement('option'); opt.value = y; opt.innerText = `${y}년`;
+                if(y === currentDate.getFullYear()) opt.selected = true;
+                yearSelect.appendChild(opt);
+            }
+            for(let m = 1; m <= 12; m++) {
+                const opt = document.createElement('option'); opt.value = m - 1; opt.innerText = `${m}월`;
+                if((m - 1) === currentDate.getMonth()) opt.selected = true;
+                monthSelect.appendChild(opt);
+            }
+        }
+
+        function selectYearMonth() {
+            currentDate = new Date(parseInt(document.getElementById('select-year').value), parseInt(document.getElementById('select-month').value), 1);
+            renderCalendar();
+            renderTodoList();
+        }
+
+        function moveMonth(dir) {
+            currentDate.setMonth(currentDate.getMonth() + dir);
+            initYearMonthSelectors();
+            renderCalendar();
+        }
+
+        // 초기 로딩 스왑을 위해 매개변수 silent 추가형 리팩토링
+        function toggleDarkMode(silent = false) {
+            if (!silent) {
+                isDarkMode = !isDarkMode;
+                localStorage.setItem('vibe_planner_dark', isDarkMode);
+            } else {
+                isDarkMode = true;
+            }
+            
+            const body = document.getElementById('app-body');
+            const container = document.getElementById('app-container');
+            const circle = document.getElementById('dark-toggle-circle');
+            const toggleBtn = document.getElementById('dark-toggle-btn');
+            const miniBtn = document.querySelector('.id-mini-btn');
+
+            if(isDarkMode) {
+                body.className = "bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-2 md:p-6 transition-colors duration-300";
+                container.className = "relative w-full max-w-md bg-slate-900 text-slate-100 rounded-[36px] shadow-2xl border border-slate-800 overflow-hidden h-[845px] flex flex-col justify-between transition-colors duration-300";
+                circle.className = "w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-200 translate-x-5";
+                toggleBtn.className = "w-10 h-5 bg-blue-600 rounded-full p-0.5 transition-colors relative cursor-pointer flex items-center";
+                document.querySelector('.id-sub-tag').className = "text-[11px] font-bold text-blue-400 bg-blue-950/60 px-2.5 py-0.5 rounded-full tracking-wide id-sub-tag";
+                document.getElementById('submit-btn').className = "col-span-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded-xl text-xs transition cursor-pointer id-primary-btn";
+                document.querySelector('.id-nav').className = "absolute bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-slate-800 flex justify-around items-center py-2.5 z-40 rounded-b-[36px] id-nav";
+                if(miniBtn) miniBtn.className = "text-[11px] font-bold flex items-center gap-1 p-1.5 px-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl cursor-pointer active:scale-95 transition id-mini-btn";
+                if(!silent) showToast('🌙 다크 테마가 활성화되었습니다.');
+            } else {
+                body.className = "bg-slate-50 text-slate-800 min-h-screen flex items-center justify-center p-2 md:p-6 transition-colors duration-300";
+                container.className = "relative w-full max-w-md bg-white text-slate-800 rounded-[36px] shadow-2xl border border-slate-100 overflow-hidden h-[845px] flex flex-col justify-between transition-colors duration-300";
+                circle.className = "w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-200";
+                toggleBtn.className = "w-10 h-5 bg-slate-200 rounded-full p-0.5 transition-colors relative cursor-pointer flex items-center";
+                document.querySelector('.id-sub-tag').className = "text-[11px] font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full tracking-wide id-sub-tag";
+                document.getElementById('submit-btn').className = "col-span-2 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs transition cursor-pointer id-primary-btn";
+                document.querySelector('.id-nav').className = "absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-100 flex justify-around items-center py-2.5 z-40 rounded-b-[36px] id-nav";
+                if(miniBtn) miniBtn.className = "text-[11px] font-bold flex items-center gap-1 p-1.5 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl cursor-pointer active:scale-95 transition id-mini-btn";
+                if(!silent) showToast('☀️ 라이트 테마가 복원되었습니다.');
+            }
+            
+            document.querySelectorAll('.id-box').forEach(b => b.className = isDarkMode ? "bg-slate-950/50 p-4 rounded-2xl border border-slate-800 transition-colors duration-300 id-box" : "bg-slate-50 p-4 rounded-2xl border border-slate-100/70 transition-colors duration-300 id-box");
+            document.querySelectorAll('.id-input-field').forEach(i => i.className = isDarkMode ? "w-full bg-slate-800 text-slate-100 px-3 py-2 rounded-xl border border-slate-700 text-xs focus:outline-none id-input-field" : "w-full bg-white text-slate-800 px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none id-input-field");
+            document.querySelectorAll('.id-btn-arrow').forEach(a => a.className = isDarkMode ? "text-xs font-bold p-1.5 px-2.5 bg-slate-800 border border-slate-700 rounded-lg cursor-pointer id-btn-arrow" : "text-xs font-bold p-1.5 px-2.5 bg-white rounded-lg border border-slate-200 cursor-pointer id-btn-arrow");
+            document.querySelectorAll('.id-divider').forEach(d => d.className = isDarkMode ? "flex flex-col gap-1.5 border-t border-slate-800 pt-3 id-divider" : "flex flex-col gap-1.5 border-t border-slate-200 pt-3 id-divider");
+
+            renderCalendar();
+            renderTodoList();
+        }
+
+        function filterSelectedDate(dateStr) {
+            activeFilterDate = dateStr;
+            document.getElementById('selected-date-label').innerText = dateStr ? dateStr.substring(5) : "전체";
+            if(dateStr) document.getElementById('todo-date').value = dateStr;
+            renderCalendar();
+            renderTodoList();
+        }
+
+        function renderCalendar() {
+            const cellsContainer = document.getElementById('calendar-cells');
+            cellsContainer.innerHTML = '';
+
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const totalDays = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < firstDayIndex; i++) {
+                const blank = document.createElement('div');
+                cellsContainer.appendChild(blank);
+            }
+
+            for (let day = 1; day <= totalDays; day++) {
+                const dateString = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                const cell = document.createElement('button');
+                
+                const bgClass = isDarkMode ? 'bg-slate-800 hover:border-blue-500' : 'bg-white hover:border-blue-400';
+                const ringClass = activeFilterDate === dateString ? 'ring-2 ring-blue-500' : '';
+                
+                cell.className = `p-1 min-h-[48px] flex flex-col justify-between items-center rounded-xl text-[11px] font-bold border border-transparent transition cursor-pointer relative ${bgClass} ${ringClass}`;
+                cell.onclick = () => filterSelectedDate(dateString);
+
+                const dayOfWeek = new Date(year, month, day).getDay();
+                let textCol = isDarkMode ? "text-slate-200" : "text-slate-700";
+                if(dayOfWeek === 0) textCol = "text-rose-500";
+                else if(dayOfWeek === 6) textCol = "text-blue-500";
+
+                cell.innerHTML = `<span class="${textCol}">${day}</span>`;
+
+                const dayTodos = todos.filter(t => t.date === dateString);
+                if(dayTodos.length > 0) {
+                    const dotWrap = document.createElement('div');
+                    dotWrap.className = "flex gap-0.5 mb-0.5";
+                    dayTodos.slice(0, 3).forEach(t => {
+                        const dot = document.createElement('span');
+                        dot.className = `w-1 h-1 rounded-full ${t.completed ? 'bg-slate-400 dark:bg-slate-600' : 'bg-orange-500'}`;
+                        dotWrap.appendChild(dot);
+                    });
+                    cell.appendChild(dotWrap);
+                }
+                cellsContainer.appendChild(cell);
+            }
+        }
+
+        function calculateDayStats(filteredTodos) {
+            if(filteredTodos.length === 0) {
+                document.getElementById('stats-percent').innerText = "0%";
+                document.getElementById('stats-bar').style.width = "0%";
+                return;
+            }
+            const completed = filteredTodos.filter(t => t.completed).length;
+            const percentage = Math.round((completed / filteredTodos.length) * 100);
+            document.getElementById('stats-percent').innerText = `${percentage}% (${completed}/${filteredTodos.length}건)`;
+            document.getElementById('stats-bar').style.width = `${percentage}%`;
+        }
+
+        function calculateGlobalStats() {
+            const total = todos.length;
+            document.getElementById('db-total-cnt').innerText = total;
+            
+            const completed = todos.filter(t => t.completed).length;
+            document.getElementById('db-complete-cnt').innerText = completed;
+
+            const globalPercent = total > 0 ? Math.round((completed / total) * 100) : 0;
+            document.getElementById('dashboard-percent-text').innerText = `${globalPercent}%`;
+
+            // 🌟 가산점 UI/UX: SVG 원형 링 대시보드 실시간 동적 스트로크 계산
+            const ring = document.getElementById('svg-progress-ring');
+            if (ring) {
+                ring.setAttribute('stroke-dasharray', `${globalPercent}, 100`);
+            }
+
+            const priorities = ['엄청 중요', '중요', '보통', '덜 중요', '안 중요'];
+            const ids = ['ultra', 'high', 'normal', 'low', 'none'];
+
+            priorities.forEach((p, idx) => {
+                const list = todos.filter(t => t.priority === p);
+                const comp = list.filter(t => t.completed).length;
+                const rate = list.length > 0 ? Math.round((comp / list.length) * 100) : 0;
+                
+                document.getElementById(`rate-${ids[idx]}`).innerText = `${comp}/${list.length}건 (${rate}%)`;
+                document.getElementById(`bar-${ids[idx]}`).style.width = `${rate}%`;
+            });
+        }
+
+        function renderTodoList() {
+            const listContainer = document.getElementById('todo-list');
+            listContainer.innerHTML = '';
+
+            let filtered = activeFilterDate ? todos.filter(t => t.date === activeFilterDate) : todos;
+            calculateDayStats(filtered);
+
+            if(filtered.length === 0) {
+                listContainer.innerHTML = `<p class="text-center text-[11px] text-slate-400 py-6">해당 날짜 타임라인에<br>등록된 일정이 없습니다.</p>`;
+                return;
+            }
+
+            filtered.sort((a,b) => (a.time || '23:59').localeCompare(b.time || '23:59'));
+
+            filtered.forEach(todo => {
+                const cardBg = isDarkMode ? 'bg-slate-950/60 border-slate-800' : 'bg-white border-slate-100 shadow-xs';
+                const editBtnStyle = isDarkMode 
+                    ? 'bg-indigo-950/40 border-indigo-800/60 text-indigo-300 hover:bg-indigo-900/50' 
+                    : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200';
+
+                const item = document.createElement('div');
+                item.className = `flex justify-between items-center p-3.5 rounded-2xl border transition-all ${cardBg} ${todo.completed ? 'opacity-40' : ''}`;
+
+                const timeStr = todo.time ? `🕒 ${todo.time}` : '🕒 시간 미정';
+                const locStr = todo.location ? `🏢 ${todo.location}` : '📍 상세 내용 없음';
+                
+                let pBadge = '';
+                if(todo.priority === '엄청 중요') pBadge = '🚨 엄청 중요';
+                else if(todo.priority === '중요') pBadge = '⭐ 중요';
+                else if(todo.priority === '보통') pBadge = '⚡ 보통';
+                else if(todo.priority === '덜 중요') pBadge = '🌱 덜 중요';
+                else pBadge = '💤 안 중요';
+
+                item.innerHTML = `
+                    <div class="flex flex-col gap-0.5 max-w-[62%]">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-[10px] font-bold text-slate-400 font-mono tracking-tighter">${timeStr}</span>
+                            <span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">${pBadge}</span>
+                        </div>
+                        <span class="text-xs font-extrabold mt-1 ${isDarkMode ? 'text-slate-100' : 'text-slate-900'} ${todo.completed ? 'line-through' : ''} break-all">${todo.title}</span>
+                        <span class="text-[10px] text-slate-400/90 font-medium">${locStr}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="toggleComplete(${todo.id})" class="text-[10px] cursor-pointer px-2.5 py-1.5 rounded-xl border font-bold transition ${todo.completed ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-transparent border-slate-200 text-slate-500 hover:border-blue-400'}">
+                            ${todo.completed ? '✓ 완료됨' : '완료'}
+                        </button>
+                        <button onclick="startEditTodo(${todo.id})" class="text-[10px] border px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer ${editBtnStyle}">
+                            수정
+                        </button>
+                        <button onclick="deleteTodo(${todo.id})" class="text-slate-300 hover:text-rose-500 font-bold px-1 transition text-sm">✕</button>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        function saveTodo() {
+            const titleInput = document.getElementById('todo-input');
+            const locInput = document.getElementById('todo-location');
+            const dateInput = document.getElementById('todo-date');
+            const timeInput = document.getElementById('todo-time');
+            const priorityInput = document.getElementById('todo-priority');
+            const editId = document.getElementById('edit-id').value;
+
+            if(!titleInput.value.trim()) { alert('일정 계획 명칭을 기입해 주세요.'); return; }
+
+            if(editId) {
+                todos = todos.map(t => t.id === parseInt(editId) ? {
+                    ...t, title: titleInput.value.trim(), location: locInput.value.trim(),
+                    date: dateInput.value || '2026-05-31', time: timeInput.value, priority: priorityInput.value
+                } : t);
+                showToast('✏️ 해당 일정이 정상적으로 업데이트되었습니다.');
+                resetForm();
+            } else {
+                todos.push({
+                    id: Date.now(), title: titleInput.value.trim(), location: locInput.value.trim(),
+                    date: dateInput.value || '2026-05-31', time: timeInput.value, priority: priorityInput.value, completed: false
+                });
+                showToast('✨ 새 일정이 타임라인에 누적되었습니다.');
+                titleInput.value = ''; locInput.value = ''; timeInput.value = '';
+            }
+            saveToStorage(); renderCalendar(); renderTodoList();
+        }
+
+        function startEditTodo(id) {
+            const t = todos.find(todo => todo.id === id);
+            if(!t) return;
+            document.getElementById('todo-input').value = t.title;
+            document.getElementById('todo-location').value = t.location;
+            document.getElementById('todo-date').value = t.date;
+            document.getElementById('todo-time').value = t.time;
+            document.getElementById('todo-priority').value = t.priority;
+            document.getElementById('edit-id').value = t.id;
+
+            document.getElementById('form-title').innerText = "✏️ 타임라인 수정 모드 작동중";
+            document.getElementById('submit-btn').innerText = "변경사항 확정 저장";
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+            
+            document.getElementById('form-title').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('todo-input').value = '';
+            document.getElementById('todo-location').value = '';
+            document.getElementById('todo-date').value = activeFilterDate;
+            document.getElementById('todo-time').value = '';
+            document.getElementById('edit-id').value = '';
+            document.getElementById('form-title').innerText = "📍 일정 계획 추가";
+            document.getElementById('submit-btn').innerText = "+ 일정 등록";
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
+        }
+
+        function toggleComplete(id) {
+            todos = todos.map(t => t.id === id ? {...t, completed: !t.completed} : t);
+            saveToStorage(); renderCalendar(); renderTodoList();
+        }
+
+        function deleteTodo(id) {
+            todos = todos.filter(t => t.id !== id);
+            showToast('✕ 해당 일정을 안전하게 파기했습니다.');
+            saveToStorage(); renderCalendar(); renderTodoList();
+        }
+
+        function updateUsername() {
+            const v = document.getElementById('username-input').value.trim();
+            if(!v) return;
+            document.getElementById('welcome-user').innerText = v;
+            localStorage.setItem('vibe_planner_user', v);
+            document.getElementById('username-input').value = '';
+            showToast('👤 닉네임 정보가 동기화되었습니다.');
+        }
+
+        function factoryReset() {
+            if(confirm('정말 전체 데이터를 초기화하시겠습니까?')) {
+                todos = []; activeFilterDate = "";
+                localStorage.clear();
+                document.getElementById('welcome-user').innerText = "대학생";
+                if(isDarkMode) toggleDarkMode();
+                resetForm(); filterSelectedDate('');
+                showToast('🚨 초기화 리셋 프로세스가 발동되었습니다.');
+            }
+        }
+
+        function showToast(m) {
+            const t = document.getElementById('toast-notice');
+            t.innerText = m; t.style.opacity = "1";
+            setTimeout(() => { t.style.opacity = "0"; }, 2000);
+        }
+    </script>
+</body>
+</html>
